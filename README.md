@@ -1,2 +1,2 @@
-# uity-netcode-test
+# unity-netcode-test
 A testing project for experimenting with Unity's new Netcode for GameObjects
