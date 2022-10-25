@@ -23,7 +23,7 @@ public class NetworkGUI : MonoBehaviour
 
     private void RolePicker()
     {
-        foreach (var pair in PlayerTeamRoleMapping.Mapping)
+        foreach (var pair in PlayerRoleMapping.Mapping)
         {
             if (GUILayout.Button(pair.Value.ToString()))
             {

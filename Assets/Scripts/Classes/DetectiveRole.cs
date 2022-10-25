@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace Classes
 {
-    public class CivilianRole : PlayerRole
+    public class DetectiveRole : PlayerRole
     {
-        public override PlayerRoles Role => PlayerRoles.Civilian;
+        public override PlayerRoles Role => PlayerRoles.Detective;
         public override PlayerTeams Team => PlayerTeams.Innocent;
-        public override Color Color => Color.green;
+        public override Color Color => Color.blue;
 
         public override void UseAbility()
         {

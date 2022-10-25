@@ -1,76 +1,86 @@
 using Classes;
-using Unity.Collections;
+using Enums;
+using NetTypes;
 using Unity.Netcode;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
     [SerializeField] private float speed = 5;
+    [SerializeField] private Camera playerCamera;
+    
+    private readonly NetworkVariable<PlayerTransformNetState> _netState = new(writePerm: NetworkVariableWritePermission.Owner);
+    private readonly NetworkVariable<PlayerRoles> _netRole = new();
     
     private CharacterController _controller;
     private Renderer _renderer;
     
-    private readonly NetworkVariable<PlayerTransformNetState> _netState = new(writePerm: NetworkVariableWritePermission.Owner);
-    private NetworkVariable<PlayerRoles> _netRole = new();
-
+    private PlayerRole _role;
+    
     private void Awake()
     {
         _controller = GetComponent<CharacterController>();
         _renderer = GetComponent<Renderer>();
     }
-    
+
     public override void OnNetworkSpawn()
     {
-        // _netRole += OnChangeRole;
+        _netRole.OnValueChanged += OnChangeRole;
+        _netState.OnValueChanged += OnNetStateChanged;
+        playerCamera.enabled = true;
     }
 
-    private void OnChangeRole(FixedString32Bytes old, FixedString32Bytes newV)
+    public override void OnNetworkDespawn()
     {
-        // _renderer.material.color = 
+        _netRole.OnValueChanged -= OnChangeRole;
+        _netState.OnValueChanged -= OnNetStateChanged;
+    }
+
+    private void OnChangeRole(PlayerRoles prevValue, PlayerRoles newValue)
+    {
+        _role = PlayerRoleMapping.Mapping[newValue];
+        _renderer.material.color = _role.Color;
     }
     
-    [ServerRpc(RequireOwnership = false)]
-    public void ChangeRoleServerRpc(PlayerRoles roleName, ServerRpcParams serverRpcParams = default)
+    private void OnNetStateChanged(PlayerTransformNetState prevVal, PlayerTransformNetState newValue)
     {
-        var sendClientId = serverRpcParams.Receive.SenderClientId;
-        var senderObject = NetworkManager.ConnectedClients[sendClientId].PlayerObject;
+        if (IsOwner) return;
         
-        if (!senderObject.TryGetComponent<Player>(out var player)) return;
-        
+        transform.position = _netState.Value.Position;
+        transform.rotation = Quaternion.Euler(0, _netState.Value.YRotation, 0);
+    }
+
+    [ServerRpc]
+    public void ChangeRoleServerRpc(PlayerRoles roleName)
+    {
         _netRole.Value = roleName;
+    }
+    
+    [ServerRpc]
+    private void UseAbilityServerRpc()
+    {
+        _role?.UseAbility();
     }
 
     private void Update()
     {
-        _renderer.material.color = _netRole.Value == PlayerRoles.Civilian ? Color.green : Color.red;
+        if (!IsOwner) return;
         
-        if (!IsOwner)
-        {
-            transform.position = _netState.Value.Position;
-            transform.rotation = Quaternion.Euler(0, _netState.Value.YRotation, 0);
-            
-            return;
-        }
-        
+        // TODO: check with new unity input system;
+        if (Input.GetButtonDown("Fire1")) UseAbilityServerRpc();
         var input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         
-        _controller.Move(new Vector3(input.x, 0, input.y) * (speed * Time.deltaTime));
+        var mouseX = Input.GetAxis("Mouse X");
+        var mouseY = Input.GetAxis("Mouse Y");
+        
+        transform.Rotate(Vector3.up, mouseX);
+        playerCamera.transform.Rotate(Vector3.right, -mouseY, Space.Self);
+        
+        _controller.Move( transform.rotation * new Vector3(input.x, 0, input.y) * (speed * Time.deltaTime));
         _netState.Value = new PlayerTransformNetState()
         {
             Position = transform.position,
             YRotation = 0
         };
-    }
-
-    private struct PlayerTransformNetState : INetworkSerializable
-    {
-        public Vector3 Position;
-        public float YRotation;
-        
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            serializer.SerializeValue(ref Position);
-            serializer.SerializeValue(ref YRotation);
-        }
     }
 }
