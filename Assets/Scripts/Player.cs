@@ -1,5 +1,5 @@
 using Classes;
-using Enums;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -8,31 +8,42 @@ public class Player : NetworkBehaviour
     [SerializeField] private float speed = 5;
     
     private CharacterController _controller;
-
+    private Renderer _renderer;
+    
     private readonly NetworkVariable<PlayerTransformNetState> _netState = new(writePerm: NetworkVariableWritePermission.Owner);
-    private PlayerRole role;
-    
-    
+    private NetworkVariable<PlayerRoles> _netRole = new();
+
     private void Awake()
     {
         _controller = GetComponent<CharacterController>();
-        
-        // _netState.OnValueChanged += OnNetStateUpdate;
+        _renderer = GetComponent<Renderer>();
     }
-
-    public override void OnDestroy()
+    
+    public override void OnNetworkSpawn()
     {
-        // _netState.OnValueChanged -= OnNetStateUpdate;
+        // _netRole += OnChangeRole;
     }
 
-    // private void OnNetStateUpdate(PlayerNetState prevValue, PlayerNetState newValue)
-    // {
-    //     transform.position = _netState.Value.Position;
-    //     transform.rotation = Quaternion.Euler(0, _netState.Value.YRotation, 0);
-    // }
+    private void OnChangeRole(FixedString32Bytes old, FixedString32Bytes newV)
+    {
+        // _renderer.material.color = 
+    }
+    
+    [ServerRpc(RequireOwnership = false)]
+    public void ChangeRoleServerRpc(PlayerRoles roleName, ServerRpcParams serverRpcParams = default)
+    {
+        var sendClientId = serverRpcParams.Receive.SenderClientId;
+        var senderObject = NetworkManager.ConnectedClients[sendClientId].PlayerObject;
+        
+        if (!senderObject.TryGetComponent<Player>(out var player)) return;
+        
+        _netRole.Value = roleName;
+    }
 
     private void Update()
     {
+        _renderer.material.color = _netRole.Value == PlayerRoles.Civilian ? Color.green : Color.red;
+        
         if (!IsOwner)
         {
             transform.position = _netState.Value.Position;
@@ -60,21 +71,6 @@ public class Player : NetworkBehaviour
         {
             serializer.SerializeValue(ref Position);
             serializer.SerializeValue(ref YRotation);
-        }
-    }
-    
-    private struct PlayerIdentityNetState : INetworkSerializable
-    {
-        // public Vector3 Position;
-        // public float YRotation;
-
-        public PlayerTeams Team;
-        
-        
-        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-        {
-            // serializer.SerializeValue(ref Position);
-            // serializer.SerializeValue(ref YRotation);
         }
     }
 }

@@ -10,7 +10,5 @@ namespace Classes
         }
 
         public PlayerTeams Team { get; }
-
-        // public string GetRoleName() {}
     }
 }
