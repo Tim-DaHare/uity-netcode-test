@@ -8,19 +8,19 @@ public class Player : NetworkBehaviour
 {
     [SerializeField] private float speed = 5;
     [SerializeField] private Camera playerCamera;
+    [SerializeField] private Renderer capsuleRenderer;
     
     private readonly NetworkVariable<PlayerTransformNetState> _netState = new(writePerm: NetworkVariableWritePermission.Owner);
     private readonly NetworkVariable<PlayerRoles> _netRole = new();
+    // private readonly NetworkVariable<bool> _isAliveNet = new();
     
     private CharacterController _controller;
-    private Renderer _renderer;
-    
+
     private PlayerRole _role;
     
     private void Awake()
     {
         _controller = GetComponent<CharacterController>();
-        _renderer = GetComponent<Renderer>();
     }
 
     public override void OnNetworkSpawn()
@@ -39,7 +39,7 @@ public class Player : NetworkBehaviour
     private void OnChangeRole(PlayerRoles prevValue, PlayerRoles newValue)
     {
         _role = PlayerRoleMapping.Mapping[newValue];
-        _renderer.material.color = _role.Color;
+        capsuleRenderer.material.color = _role.Color;
     }
     
     private void OnNetStateChanged(PlayerTransformNetState prevVal, PlayerTransformNetState newValue)
@@ -80,7 +80,7 @@ public class Player : NetworkBehaviour
         _netState.Value = new PlayerTransformNetState()
         {
             Position = transform.position,
-            YRotation = 0
+            YRotation = transform.rotation.eulerAngles.y
         };
     }
 }

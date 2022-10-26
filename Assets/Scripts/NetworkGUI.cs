@@ -25,7 +25,7 @@ public class NetworkGUI : MonoBehaviour
     {
         foreach (var pair in PlayerRoleMapping.Mapping)
         {
-            if (GUILayout.Button(pair.Value.ToString()))
+            if (pair.Value != null && GUILayout.Button(pair.Value.ToString()))
             {
                 var localPlayerObj = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
                 if (!localPlayerObj || !localPlayerObj.TryGetComponent<Player>(out var player)) return;
