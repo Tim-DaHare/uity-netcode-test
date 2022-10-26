@@ -68,6 +68,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 5
   playerCamera: {fileID: 423701601691628503}
+  audioListener: {fileID: 6457785634783358261}
   capsuleRenderer: {fileID: 3300922989037548315}
 --- !u!114 &-2042986098378426152
 MonoBehaviour:
@@ -169,7 +170,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 347490661779020126}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!114 &411789044877143711
 MonoBehaviour:
   m_ObjectHideFlags: 0

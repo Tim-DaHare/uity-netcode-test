@@ -1,4 +1,3 @@
-using Classes;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -23,16 +22,28 @@ public class NetworkGUI : MonoBehaviour
 
     private void RolePicker()
     {
-        foreach (var pair in PlayerRoleMapping.Mapping)
+        if (GUILayout.Button("Get random role"))
         {
-            if (pair.Value != null && GUILayout.Button(pair.Value.ToString()))
-            {
-                var localPlayerObj = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
-                if (!localPlayerObj || !localPlayerObj.TryGetComponent<Player>(out var player)) return;
-                
-                player.ChangeRoleServerRpc(pair.Key);
-            }
+            var localPlayerObj = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
+            if (!localPlayerObj || !localPlayerObj.TryGetComponent<Player>(out var player)) return;
+            
+            player.ChangeRoleServerRpc();
+            
+            
+            GUILayout.Label("Role: " + player.Role);
         }
+        
+        
+        // foreach (var pair in PlayerRoleMapping.Mapping)
+        // {
+        //     if (pair.Value != null && GUILayout.Button(pair.Value.ToString()))
+        //     {
+        //         var localPlayerObj = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
+        //         if (!localPlayerObj || !localPlayerObj.TryGetComponent<Player>(out var player)) return;
+        //         
+        //         player.ChangeRoleServerRpc(pair.Key);
+        //     }
+        // }
     }
 
     static void StartButtons()

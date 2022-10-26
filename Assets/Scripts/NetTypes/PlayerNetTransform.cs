@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace NetTypes
 {
-    public struct PlayerTransformNetState : INetworkSerializable
+    public struct PlayerNetTransform : INetworkSerializable
     {
         public Vector3 Position;
         public float YRotation;

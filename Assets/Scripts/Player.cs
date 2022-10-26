@@ -8,15 +8,16 @@ public class Player : NetworkBehaviour
 {
     [SerializeField] private float speed = 5;
     [SerializeField] private Camera playerCamera;
+    [SerializeField] private AudioListener audioListener;
     [SerializeField] private Renderer capsuleRenderer;
     
-    private readonly NetworkVariable<PlayerTransformNetState> _netState = new(writePerm: NetworkVariableWritePermission.Owner);
-    private readonly NetworkVariable<PlayerRoles> _netRole = new();
-    // private readonly NetworkVariable<bool> _isAliveNet = new();
+    private readonly NetworkVariable<PlayerNetTransform> _netTransform = new(writePerm: NetworkVariableWritePermission.Owner);
+    private readonly NetworkVariable<PlayerRoles> _netRole = new(readPerm: NetworkVariableReadPermission.Owner);
+    // private readonly NetworkVariable<bool> _netIsAlive = new();
     
     private CharacterController _controller;
-
-    private PlayerRole _role;
+    
+    public PlayerRole Role { get; private set; }
     
     private void Awake()
     {
@@ -26,42 +27,47 @@ public class Player : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         _netRole.OnValueChanged += OnChangeRole;
-        _netState.OnValueChanged += OnNetStateChanged;
-        playerCamera.enabled = true;
+        _netTransform.OnValueChanged += OnNetStateChanged;
+        
+        if (IsOwner) playerCamera.enabled = true;
+        if (IsOwner) audioListener.enabled = true;
     }
 
     public override void OnNetworkDespawn()
     {
         _netRole.OnValueChanged -= OnChangeRole;
-        _netState.OnValueChanged -= OnNetStateChanged;
+        _netTransform.OnValueChanged -= OnNetStateChanged;
     }
 
     private void OnChangeRole(PlayerRoles prevValue, PlayerRoles newValue)
     {
-        _role = PlayerRoleMapping.Mapping[newValue];
-        capsuleRenderer.material.color = _role.Color;
+        Role = PlayerRoleMapping.Mapping[newValue];
+        capsuleRenderer.material.color = Role.Color;
     }
     
-    private void OnNetStateChanged(PlayerTransformNetState prevVal, PlayerTransformNetState newValue)
+    private void OnNetStateChanged(PlayerNetTransform prevVal, PlayerNetTransform newValue)
     {
         if (IsOwner) return;
         
-        transform.position = _netState.Value.Position;
-        transform.rotation = Quaternion.Euler(0, _netState.Value.YRotation, 0);
+        transform.position = _netTransform.Value.Position;
+        transform.rotation = Quaternion.Euler(0, _netTransform.Value.YRotation, 0);
     }
 
     [ServerRpc]
-    public void ChangeRoleServerRpc(PlayerRoles roleName)
+    public void ChangeRoleServerRpc()
     {
-        _netRole.Value = roleName;
+        if (PlayerRoleMapping.Mapping.Count == 0) return;
+        
+        var i = Random.Range(1, PlayerRoleMapping.Mapping.Count);
+        _netRole.Value = (PlayerRoles)i;
     }
     
     [ServerRpc]
     private void UseAbilityServerRpc()
     {
-        _role?.UseAbility();
+        Role?.UseAbility();
     }
-
+    
     private void Update()
     {
         if (!IsOwner) return;
@@ -76,11 +82,12 @@ public class Player : NetworkBehaviour
         transform.Rotate(Vector3.up, mouseX);
         playerCamera.transform.Rotate(Vector3.right, -mouseY, Space.Self);
         
-        _controller.Move( transform.rotation * new Vector3(input.x, 0, input.y) * (speed * Time.deltaTime));
-        _netState.Value = new PlayerTransformNetState()
+        var currRotation = transform.rotation;
+        _controller.Move( currRotation * new Vector3(input.x, 0, input.y) * (speed * Time.deltaTime));
+        _netTransform.Value = new PlayerNetTransform()
         {
             Position = transform.position,
-            YRotation = transform.rotation.eulerAngles.y
+            YRotation = currRotation.eulerAngles.y
         };
     }
 }
