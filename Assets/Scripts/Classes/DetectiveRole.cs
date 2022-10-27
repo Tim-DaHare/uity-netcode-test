@@ -1,4 +1,5 @@
 ﻿using Enums;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Classes
@@ -8,10 +9,9 @@ namespace Classes
         public override PlayerRoles Role => PlayerRoles.Detective;
         public override PlayerTeams Team => PlayerTeams.Innocent;
         public override Color Color => Color.blue;
-
-        public override void UseAbility()
+        public override void UseAbility(ulong senderClientId = default, FastBufferReader reader = default)
         {
-            
+            throw new System.NotImplementedException();
         }
     }
 }
