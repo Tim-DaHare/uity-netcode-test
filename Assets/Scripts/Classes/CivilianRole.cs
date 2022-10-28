@@ -9,7 +9,12 @@ namespace Classes
         public override PlayerRoles Role => PlayerRoles.Civilian;
         public override PlayerTeams Team => PlayerTeams.Innocent;
         public override Color Color => Color.green;
-        public override void UseAbility(ulong senderClientId = default, FastBufferReader reader = default)
+        public override void UseAbility()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void UseAbilityServer(ulong senderClientId = default, FastBufferReader reader = default)
         {
             throw new System.NotImplementedException();
         }

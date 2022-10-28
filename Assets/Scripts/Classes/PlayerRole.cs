@@ -9,6 +9,7 @@ namespace Classes
         public abstract PlayerRoles Role { get; }
         public abstract PlayerTeams Team { get; }
         public abstract Color Color { get; }
-        public abstract void UseAbility(ulong senderClientId = default, FastBufferReader reader = default);
+        public abstract void UseAbility();
+        public abstract void UseAbilityServer(ulong senderClientId = default, FastBufferReader reader = default);
     }
 }

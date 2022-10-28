@@ -30,6 +30,14 @@ public class Player : NetworkBehaviour
         
         if (IsOwner) playerCamera.enabled = true;
         if (IsOwner) audioListener.enabled = true;
+
+        // if (IsServer)
+        // {
+        //     NetworkManager.Singleton.OnClientConnectedCallback += clientId =>
+        //     {
+        //         NetworkManager.ConnectedClients[clientId].PlayerObject.transform.name = "Player " + clientId;
+        //     };
+        // }
     }
     
     public override void OnNetworkDespawn()
