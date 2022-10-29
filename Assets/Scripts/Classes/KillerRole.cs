@@ -11,53 +11,53 @@ namespace Classes
         public override PlayerRoles Role => PlayerRoles.Killer;
         public override PlayerTeams Team => PlayerTeams.Evil;
         public override Color Color => Color.red;
-        
+        public override string RoleName => "Killer";
+
         /// <summary>
-        ///     This method allows the player to use his role ability
+        /// This method allows the player to use his role ability
         /// </summary>
-        /// <param name="senderClientId">The Client Id of the client that send the message to the server (only available on server)</param>
-        /// <param name="reader">Buffer containing the data (only available on server)</param>
         public override void UseAbility()
         {
-            var abilityBuffer = GetAbilityDataBuffer();
-            
             if (!NetworkManager.Singleton.IsServer)
             {
+                var abilityBuffer = GetAbilityDataBuffer();
+
                 using (abilityBuffer)
                     NetworkManager.Singleton.CustomMessagingManager.SendUnnamedMessage(NetworkManager.ServerClientId, abilityBuffer);
             }
             // if is server
             else
             {
-                var oof = new FastBufferReader(writer: abilityBuffer, Allocator.None); // this line is dumb but ok
-                UseAbilityServer(NetworkManager.ServerClientId, oof);
+                AbilityLogic(LocalPlayer.PlayerCamera.transform.forward, LocalPlayer);
             }
         }
 
-        public override void UseAbilityServer(ulong senderClientId = default, FastBufferReader reader = default)
+        public override void UseAbilityMessage(ulong senderClientId = default, FastBufferReader reader = default)
         {
             reader.ReadValueSafe(out Vector3 lookDir);
             
-            var playerObject = NetworkManager.Singleton.ConnectedClients[senderClientId].PlayerObject;
-            var sendingPlayer = playerObject.GetComponent<Player>();
+            var abilityPlayer = NetworkManager.Singleton.ConnectedClients[senderClientId].PlayerObject.GetComponent<Player>();
             
-            var origin = sendingPlayer.PlayerCamera.transform.position;
+            AbilityLogic(lookDir, abilityPlayer);
+        }
+        
+        private static void AbilityLogic(Vector3 aimDir, Player abilityPlayer)
+        {
+            var origin = abilityPlayer.PlayerCamera.transform.position;
             
-            var ray = new Ray(origin, lookDir);
+            var ray = new Ray(origin, aimDir);
             if (!Physics.Raycast(ray, out var hitInfo, 1)) return;
 
             if (!hitInfo.transform.TryGetComponent<ClientNetworkTransform>(out var hitPlayerTransform)) return;
 
-            hitPlayerTransform.SetState(Vector3.zero);
+            hitPlayerTransform.SetState(Vector3.zero, shouldGhostsInterpolate: false);
         }
-
-        private FastBufferWriter GetAbilityDataBuffer()
+        
+        private static FastBufferWriter GetAbilityDataBuffer()
         {
-            var localPlayer = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<Player>();
-            
-            var facingDir = localPlayer.PlayerCamera.transform.forward;            
+            var facingDir = LocalPlayer.PlayerCamera.transform.forward;            
             var writer = new FastBufferWriter(sizeof(float) * 3, Allocator.Temp);
-
+            
             writer.WriteValueSafe(facingDir);
             
             return writer;

@@ -21,7 +21,7 @@ namespace Classes
             var playerObject = NetworkManager.ConnectedClients[senderClientId].PlayerObject;
             var sendingPlayer = playerObject.GetComponent<Player>();
             
-            sendingPlayer.Role.UseAbilityServer(senderClientId, reader);
+            sendingPlayer.Role.UseAbilityMessage(senderClientId, reader);
         }
     }
 }
