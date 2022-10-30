@@ -16,7 +16,9 @@ namespace Classes
 
         public static PlayerRole[] GetRolesForTeam(PlayerTeams team)
         {
-            return Mapping.Where(kv => kv.Value.Team == team).Select(skv => skv.Value).ToArray();
+            return Mapping.Where(kv => kv.Value.Team == team)
+                .Select(skv => skv.Value)
+                .ToArray();
         } 
     }
 }

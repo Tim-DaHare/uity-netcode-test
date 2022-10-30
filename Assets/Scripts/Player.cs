@@ -30,14 +30,6 @@ public class Player : NetworkBehaviour
         
         if (IsOwner) playerCamera.enabled = true;
         if (IsOwner) audioListener.enabled = true;
-        
-        // if (IsServer)
-        // {
-        //     NetworkManager.Singleton.OnClientConnectedCallback += clientId =>
-        //     {
-        //         NetworkManager.ConnectedClients[clientId].PlayerObject.transform.name = "Player " + clientId;
-        //     };
-        // }
     }
     
     public override void OnNetworkDespawn()
@@ -50,20 +42,11 @@ public class Player : NetworkBehaviour
         Role = PlayerRoleMapping.Mapping[newValue];
         capsuleRenderer.material.color = Role.Color;
     }
-
+    
     public void SetPlayerRole(PlayerRoles role)
     {
         if (!IsServer) return;
         _netRole.Value = role;
-    }
-    
-    [ServerRpc]
-    public void ChangeRoleServerRpc()
-    {
-        if (PlayerRoleMapping.Mapping.Count == 0) return;
-        
-        var i = Random.Range(1, PlayerRoleMapping.Mapping.Count);
-        _netRole.Value = (PlayerRoles)i;
     }
     
     private void Update()
