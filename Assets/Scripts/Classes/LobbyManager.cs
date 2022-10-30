@@ -11,6 +11,8 @@ namespace Classes
         
         public void StartMatch()
         {
+            if (NetworkManager.ConnectedClients.Count == 0) return;
+            
             IsMatchStarted = true;
             AssignRolesToPlayers();
         }

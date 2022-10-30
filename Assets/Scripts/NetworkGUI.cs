@@ -5,7 +5,7 @@ using UnityEngine;
 public class NetworkGUI : MonoBehaviour
 {
     private static LobbyManager LobbyManager => GameManger.Singleton.LobbyManager;
-    
+
     private void OnGUI()
     {
         GUILayout.BeginArea(new Rect(10, 10, 300, 300));
@@ -32,6 +32,8 @@ public class NetworkGUI : MonoBehaviour
         {
             if (GUILayout.Button("Start Match")) GameManger.Singleton.LobbyManager.StartMatch();
         }
+        
+        if (GUILayout.Button(NetworkManager.Singleton.IsServer ? "Stop Server" : "Leave lobby")) NetworkManager.Singleton.Shutdown();
     }
 
     private static void RolePicker()
