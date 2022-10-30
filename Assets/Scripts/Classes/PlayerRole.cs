@@ -13,7 +13,6 @@ namespace Classes
         protected static Player LocalPlayer => NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<Player>();
         public abstract void UseAbility();
         public abstract void UseAbilityMessage(ulong senderClientId = default, FastBufferReader reader = default);
-
         public override string ToString() => RoleName;
     }
 }

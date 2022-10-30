@@ -30,7 +30,7 @@ public class Player : NetworkBehaviour
         
         if (IsOwner) playerCamera.enabled = true;
         if (IsOwner) audioListener.enabled = true;
-
+        
         // if (IsServer)
         // {
         //     NetworkManager.Singleton.OnClientConnectedCallback += clientId =>
@@ -49,6 +49,12 @@ public class Player : NetworkBehaviour
     {
         Role = PlayerRoleMapping.Mapping[newValue];
         capsuleRenderer.material.color = Role.Color;
+    }
+
+    public void SetPlayerRole(PlayerRoles role)
+    {
+        if (!IsServer) return;
+        _netRole.Value = role;
     }
     
     [ServerRpc]

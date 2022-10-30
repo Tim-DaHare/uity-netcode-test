@@ -47,7 +47,7 @@ namespace Classes
             
             var ray = new Ray(origin, aimDir);
             if (!Physics.Raycast(ray, out var hitInfo, 1)) return;
-
+            
             if (!hitInfo.transform.TryGetComponent<ClientNetworkTransform>(out var hitPlayerTransform)) return;
 
             hitPlayerTransform.SetState(Vector3.zero, shouldGhostsInterpolate: false);

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Enums;
 
 namespace Classes
@@ -12,5 +13,10 @@ namespace Classes
             {PlayerRoles.Detective, new DetectiveRole()},
             {PlayerRoles.Killer, new KillerRole()},
         };
+
+        public static PlayerRole[] GetRolesForTeam(PlayerTeams team)
+        {
+            return Mapping.Where(kv => kv.Value.Team == team).Select(skv => skv.Value).ToArray();
+        } 
     }
 }

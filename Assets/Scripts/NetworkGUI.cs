@@ -1,8 +1,11 @@
+using Classes;
 using Unity.Netcode;
 using UnityEngine;
 
 public class NetworkGUI : MonoBehaviour
 {
+    private static LobbyManager LobbyManager => GameManger.Singleton.LobbyManager;
+    
     private void OnGUI()
     {
         GUILayout.BeginArea(new Rect(10, 10, 300, 300));
@@ -14,10 +17,21 @@ public class NetworkGUI : MonoBehaviour
         else
         {
             StatusLabels();
-            RolePicker();
+            LobbyControls();
+            // RolePicker();
         }
         
         GUILayout.EndArea();
+    }
+
+    private void LobbyControls()
+    {
+        if (LobbyManager.IsMatchStarted) return;
+
+        if (NetworkManager.Singleton.IsServer)
+        {
+            if (GUILayout.Button("Start Match")) GameManger.Singleton.LobbyManager.StartMatch();
+        }
     }
 
     private static void RolePicker()
