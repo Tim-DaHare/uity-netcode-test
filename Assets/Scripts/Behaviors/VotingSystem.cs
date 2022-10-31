@@ -5,7 +5,7 @@ namespace Behaviors
 {
     public class VotingSystem : NetworkBehaviour
     {
-        private Dictionary<ulong, int> _votes = new ();
+        private Dictionary<ulong, int> _votes = new();
         
         public void GetVoteCount()
         {
