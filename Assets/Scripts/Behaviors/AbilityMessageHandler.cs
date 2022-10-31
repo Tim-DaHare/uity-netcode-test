@@ -1,6 +1,6 @@
 ﻿using Unity.Netcode;
 
-namespace Classes
+namespace Behaviors
 {
     public class AbilityMessageHandler : NetworkBehaviour
     {

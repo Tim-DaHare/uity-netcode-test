@@ -1,7 +1,8 @@
-using UnityEngine;
+using Classes;
 using Unity.Netcode;
+using UnityEngine;
 
-namespace Classes
+namespace Behaviors
 {
     public class GameTimeManager : NetworkBehaviour
     {
@@ -15,8 +16,8 @@ namespace Classes
         /// <summary>
         /// The Time of seconds since the match has started
         /// </summary>
-        public double MatchTime => NetworkManager.ServerTime.Time - LobbyManager.MatchStartedAt;
-        public double CurrentDaytime => MatchTime % dayDuration;
+        public float MatchTime => NetworkManager.ServerTime.TimeAsFloat - LobbyManager.MatchStartedAt;
+        public float CurrentDaytime => MatchTime % dayDuration;
         public float DayTimeRatio => (float)CurrentDaytime / dayDuration;
 
         private void Update()

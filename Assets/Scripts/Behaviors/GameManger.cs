@@ -1,6 +1,7 @@
+using Classes;
 using UnityEngine;
 
-namespace Classes
+namespace Behaviors
 {
     public class GameManger : MonoBehaviour
     {
