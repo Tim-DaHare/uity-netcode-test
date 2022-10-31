@@ -1,26 +1,27 @@
 ﻿using System.Linq;
-using Enums;
 using Unity.Netcode;
+using Enums;
 using URandom = UnityEngine.Random;
 
 namespace Classes
 {
     public class LobbyManager : NetworkBehaviour
     {
-        public bool IsMatchStarted { get; private set; }
+        private readonly NetworkVariable<double> _matchStartedAt = new(-1);
+
+        public bool IsMatchStarted => _matchStartedAt.Value >= 0;
+        public double MatchStartedAt => _matchStartedAt.Value;
         
         public void StartMatch()
         {
-            if (NetworkManager.ConnectedClients.Count == 0) return;
+            if (!IsServer || NetworkManager.ConnectedClients.Count == 0) return;
             
-            IsMatchStarted = true;
+            _matchStartedAt.Value = NetworkManager.ServerTime.Time;
             AssignRolesToPlayers();
         }
         
         private void AssignRolesToPlayers()
         {
-            if (!IsServer) return; // Only server can assign roles to players
-            
             var randKillerIndex = URandom.Range(0, NetworkManager.ConnectedClients.Keys.Count());
             var killerClientId = NetworkManager.ConnectedClients.Keys.ElementAt(randKillerIndex);
             

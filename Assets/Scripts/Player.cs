@@ -10,17 +10,20 @@ public class Player : NetworkBehaviour
     [SerializeField] private AudioListener audioListener;
     [SerializeField] private Renderer capsuleRenderer;
     
-    public Camera PlayerCamera => playerCamera;
-    
     private readonly NetworkVariable<PlayerRoles> _netRole = new(readPerm: NetworkVariableReadPermission.Owner);
-    // private readonly NetworkVariable<bool> _netIsAlive = new();
+    private readonly NetworkVariable<int> _netHealth = new(100);
     
     private CharacterController _controller;
+    private float _camXRotation;
+    
+    public Camera PlayerCamera => playerCamera;
+    public bool IsAlive => _netHealth.Value > 0;
     
     public PlayerRole Role { get; private set; }
     
     private void Awake()
     {
+        _camXRotation = playerCamera.transform.localEulerAngles.x;
         _controller = GetComponent<CharacterController>();
     }
     
@@ -42,13 +45,7 @@ public class Player : NetworkBehaviour
         Role = PlayerRoleMapping.Mapping[newValue];
         capsuleRenderer.material.color = Role.Color;
     }
-    
-    public void SetPlayerRole(PlayerRoles role)
-    {
-        if (!IsServer) return;
-        _netRole.Value = role;
-    }
-    
+
     private void Update()
     {
         if (!IsOwner) return;
@@ -61,9 +58,19 @@ public class Player : NetworkBehaviour
         var mouseY = Input.GetAxis("Mouse Y");
         
         transform.Rotate(Vector3.up, mouseX);
-        playerCamera.transform.Rotate(Vector3.right, -mouseY, Space.Self);
         
+        _camXRotation = Mathf.Clamp(_camXRotation - mouseY, -90, 90);
+        playerCamera.transform.localEulerAngles = new Vector3(_camXRotation, 0, 0);
+
         var currRotation = transform.rotation;
-        _controller.Move( currRotation * new Vector3(input.x, 0, input.y) * (speed * Time.deltaTime));
+
+        var xzMoveDir = Vector3.ClampMagnitude(currRotation * new Vector3(input.x, 0, input.y), 1);
+        _controller.Move( xzMoveDir * (speed * Time.deltaTime));
+    }
+    
+    public void SetPlayerRole(PlayerRoles role)
+    {
+        if (!IsServer) return;
+        _netRole.Value = role;
     }
 }

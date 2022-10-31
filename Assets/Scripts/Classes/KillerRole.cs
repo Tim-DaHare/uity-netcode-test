@@ -21,15 +21,12 @@ namespace Classes
             if (!NetworkManager.Singleton.IsServer)
             {
                 var abilityBuffer = GetAbilityDataBuffer();
-
+                
                 using (abilityBuffer)
                     NetworkManager.Singleton.CustomMessagingManager.SendUnnamedMessage(NetworkManager.ServerClientId, abilityBuffer);
             }
             // if is server
-            else
-            {
-                AbilityLogic(LocalPlayer.PlayerCamera.transform.forward, LocalPlayer);
-            }
+            else AbilityLogic(LocalPlayer.PlayerCamera.transform.forward, LocalPlayer);
         }
 
         public override void UseAbilityMessage(ulong senderClientId = default, FastBufferReader reader = default)

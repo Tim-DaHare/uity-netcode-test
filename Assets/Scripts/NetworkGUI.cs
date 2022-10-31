@@ -1,11 +1,12 @@
-using Classes;
-using Unity.Netcode;
 using UnityEngine;
+using Unity.Netcode;
+using Classes;
 
 public class NetworkGUI : MonoBehaviour
 {
-    private static LobbyManager LobbyManager => GameManger.Singleton.LobbyManager;
-
+    private static GameManger GameManger => GameManger.Singleton;
+    private static Player LocalPlayer => NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<Player>();
+    
     private void OnGUI()
     {
         GUILayout.BeginArea(new Rect(10, 10, 300, 300));
@@ -18,21 +19,23 @@ public class NetworkGUI : MonoBehaviour
         {
             StatusLabels();
             LobbyControls();
+
+            if (GameManger.LobbyManager.IsMatchStarted)
+            {
+                GUILayout.Label("Role: " + LocalPlayer.Role.RoleName);
+                Clock();
+            }
         }
         
         GUILayout.EndArea();
     }
 
-    private static void LobbyControls()
+    private static void Clock()
     {
-        if (LobbyManager.IsMatchStarted) return;
-
-        if (NetworkManager.Singleton.IsServer)
-        {
-            if (GUILayout.Button("Start Match")) GameManger.Singleton.LobbyManager.StartMatch();
-        }
-        
-        if (GUILayout.Button(NetworkManager.Singleton.IsServer ? "Stop Server" : "Leave lobby")) NetworkManager.Singleton.Shutdown();
+        GUILayout.Label("Time data: ");
+        GUILayout.Label("Match time: " + GameManger.GameTimeManager.MatchTime);
+        GUILayout.Label("Day time: " + GameManger.GameTimeManager.CurrentDaytime);
+        GUILayout.Label("Day time ratio: " + GameManger.GameTimeManager.DayTimeRatio);
     }
 
     private static void StartButtons()
@@ -48,5 +51,15 @@ public class NetworkGUI : MonoBehaviour
     
         GUILayout.Label("Transport: " + NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetType().Name);
         GUILayout.Label("Mode: " + mode);
+    }
+
+    private static void LobbyControls()
+    {
+        if (NetworkManager.Singleton.IsServer && !GameManger.LobbyManager.IsMatchStarted)
+        {
+            if (GUILayout.Button("Start Match")) GameManger.Singleton.LobbyManager.StartMatch();
+        }
+        
+        if (GUILayout.Button(NetworkManager.Singleton.IsServer ? "Stop Server" : "Leave lobby")) NetworkManager.Singleton.Shutdown();
     }
 }
