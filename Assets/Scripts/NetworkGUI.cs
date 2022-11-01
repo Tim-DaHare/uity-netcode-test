@@ -1,7 +1,6 @@
 using Behaviors;
 using UnityEngine;
 using Unity.Netcode;
-using Classes;
 
 public class NetworkGUI : MonoBehaviour
 {
@@ -19,16 +18,36 @@ public class NetworkGUI : MonoBehaviour
         else
         {
             StatusLabels();
+            VoteControls();
             LobbyControls();
 
             if (GameManger.LobbyManager.IsMatchStarted)
             {
                 GUILayout.Label("Role: " + LocalPlayer.Role.RoleName);
-                Clock();
+                // Clock();
             }
         }
         
         GUILayout.EndArea();
+    }
+
+    private static void VoteControls()
+    {
+        if (!GameManger.VotingSystem.IsVotingAllowed) return;
+        
+        GUILayout.Label("Time to vote!");
+
+        if (NetworkManager.Singleton.IsServer)
+        {
+            foreach (var voteKv in GameManger.VotingSystem.GetVoteCount())
+                GUILayout.Label( voteKv.Key + ": " + voteKv.Value);
+        }
+        
+        foreach (var client in NetworkManager.Singleton.ConnectedClients)
+        {
+            if (GUILayout.Button(client.Value.PlayerObject.name))
+                GameManger.VotingSystem.SubmitVote(client.Key);
+        }
     }
 
     private static void Clock()

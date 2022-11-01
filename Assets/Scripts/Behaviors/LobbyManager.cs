@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Enums;
 using Unity.Netcode;
-using URandom = UnityEngine.Random;
+using Random = UnityEngine.Random;
 
 namespace Behaviors
 {
@@ -21,7 +21,7 @@ namespace Behaviors
         
         private void AssignRolesToPlayers()
         {
-            var randKillerIndex = URandom.Range(0, NetworkManager.ConnectedClients.Keys.Count());
+            var randKillerIndex = Random.Range(0, NetworkManager.ConnectedClients.Keys.Count());
             var killerClientId = NetworkManager.ConnectedClients.Keys.ElementAt(randKillerIndex);
             
             foreach (var connectedClient in NetworkManager.ConnectedClients)

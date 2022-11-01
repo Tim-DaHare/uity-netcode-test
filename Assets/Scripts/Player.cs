@@ -18,7 +18,6 @@ public class Player : NetworkBehaviour
     
     public Camera PlayerCamera => playerCamera;
     public bool IsAlive => _netHealth.Value > 0;
-    
     public PlayerRole Role { get; private set; }
     
     private void Awake()
@@ -45,7 +44,7 @@ public class Player : NetworkBehaviour
         Role = PlayerRoleMapping.Mapping[newValue];
         capsuleRenderer.material.color = Role.Color;
     }
-
+    
     private void Update()
     {
         if (!IsOwner) return;
@@ -65,12 +64,17 @@ public class Player : NetworkBehaviour
         var currRotation = transform.rotation;
 
         var xzMoveDir = Vector3.ClampMagnitude(currRotation * new Vector3(input.x, 0, input.y), 1);
-        _controller.Move( xzMoveDir * (speed * Time.deltaTime));
+        _controller.Move(xzMoveDir * (speed * Time.deltaTime));
     }
     
     public void SetPlayerRole(PlayerRoles role)
     {
         if (!IsServer) return;
         _netRole.Value = role;
+    }
+
+    public void Die()
+    {
+        transform.position = Vector3.zero;
     }
 }
