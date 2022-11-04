@@ -12,6 +12,8 @@ namespace Behaviors
         public event Action OnNightTimeStart;
         public event Action OnNightTimeEnd;
         private static LobbyManager LobbyManager => GameManger.Singleton.LobbyManager;
+        
+        // ReSharper disable once MemberCanBePrivate.Global
         public bool IsNight => DayTimeRatio > 0.5f;
         public bool IsDay => !IsNight;
         

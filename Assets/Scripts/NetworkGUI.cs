@@ -43,10 +43,10 @@ public class NetworkGUI : MonoBehaviour
                 GUILayout.Label( voteKv.Key + ": " + voteKv.Value);
         }
         
-        foreach (var client in NetworkManager.Singleton.ConnectedClients)
+        foreach (var client in GameManger.LobbyManager.LobbyPlayers)
         {
-            if (GUILayout.Button(client.Value.PlayerObject.name))
-                GameManger.VotingSystem.SubmitVote(client.Key);
+            if (GUILayout.Button("Player " + client.ClientId))
+                GameManger.VotingSystem.SubmitVote(client.ClientId);
         }
     }
 

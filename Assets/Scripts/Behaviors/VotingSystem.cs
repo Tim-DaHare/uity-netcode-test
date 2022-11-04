@@ -8,9 +8,9 @@ namespace Behaviors
     {
         private readonly NetworkVariable<bool> _netIsVotingAllowed = new();
         private readonly Dictionary<ulong, ulong> _votes = new();
-
+        
         public bool IsVotingAllowed => _netIsVotingAllowed.Value;
-
+        
         public override void OnNetworkSpawn()
         {
             GameManger.Singleton.GameTimeManager.OnNightTimeStart += OnNightTimeStart;
@@ -29,8 +29,12 @@ namespace Behaviors
             
             // kill voted player
             var saaf = GameManger.Singleton.VotingSystem.GetClientIdWithMostVotes();
+
             if (saaf != null)
+            {
+                print("Kill player: " + saaf);
                 NetworkManager.Singleton.ConnectedClients[(ulong)saaf].PlayerObject.GetComponent<Player>().Die();
+            }
 
             _votes.Clear();
 
@@ -40,6 +44,7 @@ namespace Behaviors
         private void OnNightTimeEnd()
         {
             if (!NetworkManager.IsServer) return;
+            
             _netIsVotingAllowed.Value = true;
         }
 
@@ -88,7 +93,7 @@ namespace Behaviors
                 _votes[voterClientId] = votedOnClientId;
         }
         
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         private void SubmitVoteServerRpc(ulong votedOnClientId, ServerRpcParams rpcParams = default)
         {
             var senderId = rpcParams.Receive.SenderClientId;

@@ -1,16 +1,16 @@
-﻿using Unity.Netcode;
-using UnityEngine;
+﻿using UnityEngine;
+using Unity.Netcode;
 
 namespace NetTypes
 {
-    public struct PlayerNetTransform : INetworkSerializable
+    public struct NetPlayerInput : INetworkSerializable
     {
-        public Vector3 Position;
+        public Vector2 Input;
         public float YRotation;
-        
+
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
-            serializer.SerializeValue(ref Position);
+            serializer.SerializeValue(ref Input);
             serializer.SerializeValue(ref YRotation);
         }
     }

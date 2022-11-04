@@ -45,9 +45,10 @@ namespace Classes
             var ray = new Ray(origin, aimDir);
             if (!Physics.Raycast(ray, out var hitInfo, 1)) return;
             
-            if (!hitInfo.transform.TryGetComponent<ClientNetworkTransform>(out var hitPlayerTransform)) return;
+            if (!hitInfo.transform.TryGetComponent<Player>(out var hitPlayer)) return;
+            hitPlayer.Die();
 
-            hitPlayerTransform.SetState(Vector3.zero, shouldGhostsInterpolate: false);
+            // hitPlayerTransform.SetState(Vector3.zero, shouldGhostsInterpolate: false);
         }
         
         private static FastBufferWriter GetAbilityDataBuffer()
