@@ -16,29 +16,32 @@ namespace Behaviors
             GameManger.Singleton.GameTimeManager.OnNightTimeStart += OnNightTimeStart;
             GameManger.Singleton.GameTimeManager.OnNightTimeEnd += OnNightTimeEnd;
         }
-
+        
         public override void OnNetworkDespawn()
         {
             GameManger.Singleton.GameTimeManager.OnNightTimeStart -= OnNightTimeStart;
             GameManger.Singleton.GameTimeManager.OnNightTimeEnd -= OnNightTimeEnd;
         }
-
+        
         private void OnNightTimeStart()
         {
             if (!NetworkManager.IsServer) return;
             
             // kill voted player
-            var saaf = GameManger.Singleton.VotingSystem.GetClientIdWithMostVotes();
-
-            if (saaf != null)
+            var votedClientId = GameManger.Singleton.VotingSystem.GetClientIdWithMostVotes();
+            
+            if (votedClientId != null)
             {
-                print("Kill player: " + saaf);
-                NetworkManager.Singleton.ConnectedClients[(ulong)saaf].PlayerObject.GetComponent<Player>().Die();
+                print("Kill player: " + votedClientId);
+                NetworkManager.SpawnManager.GetPlayerNetworkObject((ulong)votedClientId).GetComponent<Player>().Die();
+                // NetworkManager.Singleton.ConnectedClients[(ulong)votedClientId].PlayerObject.GetComponent<Player>().Die();
             }
 
             _votes.Clear();
 
             _netIsVotingAllowed.Value = false;
+            
+            // TODO: Calculate if there is a winner
         }
         
         private void OnNightTimeEnd()
@@ -47,7 +50,7 @@ namespace Behaviors
             
             _netIsVotingAllowed.Value = true;
         }
-
+        
         public Dictionary<ulong, int> GetVoteCount()
         {
             var voteCount = new Dictionary<ulong, int>();
@@ -60,7 +63,7 @@ namespace Behaviors
             
             return voteCount;
         }
-
+        
         public ulong? GetClientIdWithMostVotes()
         {
             var voteCount = GetVoteCount();
@@ -74,7 +77,7 @@ namespace Behaviors
             
             return highestVotesCandidates.First().Key;
         }
-
+        
         public void SubmitVote(ulong votedOnClientId)
         {
             if (NetworkManager.IsServer)

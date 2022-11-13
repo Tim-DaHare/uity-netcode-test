@@ -30,6 +30,13 @@ namespace Behaviors
             
             NetworkManager.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.OnClientDisconnectCallback += OnClientDisconnected;
+
+            Player.OnPlayerDeath += OnPlayerDeath;
+        }
+
+        private static void OnPlayerDeath(ulong clientId)
+        {
+            
         }
 
         public override void OnNetworkDespawn()
@@ -38,6 +45,8 @@ namespace Behaviors
             
             if (!IsServer) return;
             
+            NetworkManager.OnServerStarted -= OnServerStarted;
+
             NetworkManager.OnClientConnectedCallback -= OnClientConnected;
             NetworkManager.OnClientDisconnectCallback -= OnClientDisconnected;
         }

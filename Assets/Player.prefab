@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7692017033056499492}
   - component: {fileID: -7508930973234937306}
   - component: {fileID: -2472890047315920614}
+  - component: {fileID: 3465012501654183351}
   - component: {fileID: -2042986098378426152}
   m_Layer: 0
   m_Name: Player
@@ -66,10 +67,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6e5b799395428c49a18e2edeb88475b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 5
   playerCamera: {fileID: 423701601691628503}
   audioListener: {fileID: 6457785634783358261}
   capsuleRenderer: {fileID: 3300922989037548315}
+--- !u!114 &3465012501654183351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 259378078029280629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01675e031af44cce85d4b02c8ffe676d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 5
 --- !u!114 &-2042986098378426152
 MonoBehaviour:
   m_ObjectHideFlags: 0
