@@ -14,6 +14,11 @@ namespace Classes
             {PlayerRoles.Killer, new KillerRole()},
         };
 
+        public static PlayerTeams GetTeamForRole(PlayerRoles role)
+        {
+            return Mapping.First(m => m.Value.Role == role).Value.Team;
+        }
+
         public static PlayerRole[] GetRolesForTeam(PlayerTeams team)
         {
             return Mapping.Where(kv => kv.Value.Team == team)

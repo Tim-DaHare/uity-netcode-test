@@ -12,16 +12,15 @@ public class Player : NetworkBehaviour
     [SerializeField] private Renderer capsuleRenderer;
     [SerializeField] private NetworkObject networkObject;
     
-    public static event Action<ulong> OnPlayerDeath;
-    
-    private readonly NetworkVariable<PlayerRoles> _netRole = new(readPerm: NetworkVariableReadPermission.Owner);
-    private readonly NetworkVariable<int> _netHealth = new(100);
-
     private PlayerMovement _playerMovement;
+
+    private readonly NetworkVariable<PlayerRoles> _netRole = new(PlayerRoles.Unassigned, readPerm: NetworkVariableReadPermission.Owner);
+    private readonly NetworkVariable<int> _netHealth = new(100);
 
     public Camera PlayerCamera => playerCamera;
     public bool IsAlive => _netHealth.Value > 0;
     public PlayerRole Role { get; private set; }
+    public static event Action<ulong> OnPlayerDeath;
 
     private void Awake()
     {
@@ -63,11 +62,13 @@ public class Player : NetworkBehaviour
         _netRole.Value = role;
     }
 
-    public void Die()
+    public void Kill()
     {
         if (!IsServer) return; // only server can kill players
         
         _playerMovement.Teleport(Vector3.zero);
+
+        _netHealth.Value = 0;
 
         OnPlayerDeath?.Invoke(networkObject.OwnerClientId);
     }

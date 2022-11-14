@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Classes;
 using Unity.Netcode;
 
 namespace Behaviors
@@ -27,21 +28,14 @@ namespace Behaviors
         {
             if (!NetworkManager.IsServer) return;
             
-            // kill voted player
+            // voted player
             var votedClientId = GameManger.Singleton.VotingSystem.GetClientIdWithMostVotes();
             
-            if (votedClientId != null)
-            {
-                print("Kill player: " + votedClientId);
-                NetworkManager.SpawnManager.GetPlayerNetworkObject((ulong)votedClientId).GetComponent<Player>().Die();
-                // NetworkManager.Singleton.ConnectedClients[(ulong)votedClientId].PlayerObject.GetComponent<Player>().Die();
-            }
-
+            if (votedClientId != null) NetworkManager.GetPlayer((ulong)votedClientId).Kill(); // kill voted player
+            
             _votes.Clear();
 
             _netIsVotingAllowed.Value = false;
-            
-            // TODO: Calculate if there is a winner
         }
         
         private void OnNightTimeEnd()

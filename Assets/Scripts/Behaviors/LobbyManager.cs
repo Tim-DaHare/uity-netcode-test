@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Classes;
 using Enums;
 using NetTypes;
 using Unity.Netcode;
@@ -14,7 +15,7 @@ namespace Behaviors
         public NetworkList<NetPlayerLobbyData> LobbyPlayers => _netLobbyPlayers;
         public bool IsMatchStarted => _matchStartedAt.Value >= 0;
         public float MatchStartedAt => _matchStartedAt.Value;
-
+        
         private void Awake()
         {
             _netLobbyPlayers = new NetworkList<NetPlayerLobbyData>();
@@ -34,11 +35,6 @@ namespace Behaviors
             Player.OnPlayerDeath += OnPlayerDeath;
         }
 
-        private static void OnPlayerDeath(ulong clientId)
-        {
-            
-        }
-
         public override void OnNetworkDespawn()
         {
             _netLobbyPlayers.OnListChanged -= OnChangeConnectedPlayers;
@@ -49,6 +45,30 @@ namespace Behaviors
 
             NetworkManager.OnClientConnectedCallback -= OnClientConnected;
             NetworkManager.OnClientDisconnectCallback -= OnClientDisconnected;
+            
+            Player.OnPlayerDeath -= OnPlayerDeath;
+        }
+        
+        private static void OnPlayerDeath(ulong clientId)
+        {
+            // TODO: check if round is over
+            if (!IsRoundOver()) return;
+        }
+        
+        private static bool IsRoundOver()
+        {
+            // Get the team types that still alive players in the round
+            var players = NetworkManager.Singleton.GetPlayers()
+                .Where(p => p.IsAlive)
+                .Select(p => p.Role.Team)
+                .Distinct();
+            
+            return players.Count() <= 1;
+        }
+
+        void GetWinningTeam()
+        {
+            
         }
         
         private void OnServerStarted()
