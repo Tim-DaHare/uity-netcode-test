@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Classes;
 using Enums;
 using NetTypes;
@@ -51,24 +52,25 @@ namespace Behaviors
         
         private static void OnPlayerDeath(ulong clientId)
         {
-            // TODO: check if round is over
-            if (!IsRoundOver()) return;
-        }
-        
-        private static bool IsRoundOver()
-        {
-            // Get the team types that still alive players in the round
-            var players = NetworkManager.Singleton.GetPlayers()
-                .Where(p => p.IsAlive)
-                .Select(p => p.Role.Team)
-                .Distinct();
+            var winningTeam = GetWinningTeam();
+            if (winningTeam == null) return;
             
-            return players.Count() <= 1;
+            print("Winning Team: " + winningTeam);
         }
 
-        void GetWinningTeam()
+        private static PlayerTeams? GetWinningTeam()
         {
-            
+            var remainingTeams = NetworkManager.Singleton.GetPlayers()
+                .Where(p => p.IsAlive)
+                .Select(p => p.Role.Team)
+                .Distinct().ToArray();
+
+            if (remainingTeams.Length > 1) return null;
+
+            if (!remainingTeams.Any())
+                throw new Exception("There are no teams left in the game");
+
+            return remainingTeams.First();
         }
         
         private void OnServerStarted()

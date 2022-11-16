@@ -13,20 +13,20 @@ public class Player : NetworkBehaviour
     [SerializeField] private NetworkObject networkObject;
     
     private PlayerMovement _playerMovement;
-
+    
     private readonly NetworkVariable<PlayerRoles> _netRole = new(PlayerRoles.Unassigned, readPerm: NetworkVariableReadPermission.Owner);
     private readonly NetworkVariable<int> _netHealth = new(100);
-
+    
     public Camera PlayerCamera => playerCamera;
     public bool IsAlive => _netHealth.Value > 0;
     public PlayerRole Role { get; private set; }
     public static event Action<ulong> OnPlayerDeath;
-
+    
     private void Awake()
     {
         _playerMovement = GetComponent<PlayerMovement>();
     }
-
+    
     public override void OnNetworkSpawn()
     {
         networkObject = GetComponent<NetworkObject>();
