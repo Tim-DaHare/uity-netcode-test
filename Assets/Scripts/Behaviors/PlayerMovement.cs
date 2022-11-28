@@ -13,14 +13,14 @@ namespace Behaviors
     
         private CharacterController _controller;
         private float _camXRotation;
-
+    
         private Player _player;
-
+    
         private void Awake()
         {
             _player = GetComponent<Player>();
             _controller = GetComponent<CharacterController>();
-            
+    
             _camXRotation = _player.PlayerCamera.transform.localEulerAngles.x;
         }
     
@@ -37,8 +37,16 @@ namespace Behaviors
         private void OnChangeTransform(NetPlayerTransform prevValue, NetPlayerTransform newValue)
         {
             var currTransform = transform;
-
-            if (IsOwner)
+        
+            // TODO: Fix teleport
+            // if (newValue.DidTeleport)
+            // {
+            //     print("teleported to: " + newValue.Position);
+            //     currTransform.position = newValue.Position;
+            //     currTransform.eulerAngles = new Vector3(0, newValue.YRotation, 0);
+            // }
+        
+            if (IsClient && !IsServer)
             {
                 var dist = Vector3.Distance(transform.position, newValue.Position);
                 if (dist > 0.5f) currTransform.position = newValue.Position;
@@ -93,10 +101,13 @@ namespace Behaviors
 
         public void Teleport(Vector3 position)
         {
+            if (!IsServer) return; // Only server can teleport players
+
             _netTransform.Value = new NetPlayerTransform
             {
-                Position = Vector3.zero,
-                YRotation = 0
+                Position = position,
+                YRotation = 0,
+                DidTeleport = true
             };
         }
     }
