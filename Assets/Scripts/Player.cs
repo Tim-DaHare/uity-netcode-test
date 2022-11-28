@@ -65,11 +65,16 @@ public class Player : NetworkBehaviour
     public void Kill()
     {
         if (!IsServer) return; // only server can kill players
-        
-        _playerMovement.Teleport(Vector3.zero);
 
         _netHealth.Value = 0;
 
         OnPlayerDeath?.Invoke(networkObject.OwnerClientId);
+        PlayerDeathClientRPC(); // Notify all clients this player (object) has died
+    }
+    
+    [ClientRpc]
+    public void PlayerDeathClientRPC(ClientRpcParams clientRpcParams = default)
+    {
+        gameObject.SetActive(false);
     }
 }

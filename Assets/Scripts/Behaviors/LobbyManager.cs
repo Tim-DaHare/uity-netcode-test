@@ -43,40 +43,16 @@ namespace Behaviors
             if (!IsServer) return;
             
             NetworkManager.OnServerStarted -= OnServerStarted;
-
+            
             NetworkManager.OnClientConnectedCallback -= OnClientConnected;
             NetworkManager.OnClientDisconnectCallback -= OnClientDisconnected;
             
             Player.OnPlayerDeath -= OnPlayerDeath;
         }
         
-        private static void OnPlayerDeath(ulong clientId)
-        {
-            var winningTeam = GetWinningTeam();
-            if (winningTeam == null) return;
-            
-            print("Winning Team: " + winningTeam);
-        }
-
-        private static PlayerTeams? GetWinningTeam()
-        {
-            var remainingTeams = NetworkManager.Singleton.GetPlayers()
-                .Where(p => p.IsAlive)
-                .Select(p => p.Role.Team)
-                .Distinct().ToArray();
-
-            if (remainingTeams.Length > 1) return null;
-
-            if (!remainingTeams.Any())
-                throw new Exception("There are no teams left in the game");
-
-            return remainingTeams.First();
-        }
-        
         private void OnServerStarted()
         {
             _netLobbyPlayers.Add(new NetPlayerLobbyData(NetworkManager.LocalClientId));
-            NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().name = "Player " + NetworkManager.LocalClientId;
         }
 
         private void OnClientConnected(ulong connectedClientId)
@@ -97,15 +73,44 @@ namespace Behaviors
             var connectedClientId = changeEvent.Value.ClientId;
             NetworkManager.SpawnManager.GetPlayerNetworkObject(connectedClientId).name = "Player " + connectedClientId;
         }
-
-        public void StartMatch()
-        {
-            if (!IsServer || NetworkManager.ConnectedClients.Count == 0) return;
-            
-            _matchStartedAt.Value = NetworkManager.ServerTime.TimeAsFloat;
-            AssignRolesToPlayers();
-        }
         
+        private void OnPlayerDeath(ulong clientId)
+        {
+            var winningTeam = GetWinningTeam();
+            if (winningTeam == null) return;
+
+            print("Winning Team: " + winningTeam);
+            
+            // Reset lobby
+            ResetLobby();
+        }
+
+        public void ResetLobby()
+        {
+            if (!IsServer) return; // Only server can reset the lobby data
+            
+            // Reset all the lobby fields back to the non-started state
+            _matchStartedAt.Value = -1;
+            
+            // TODO: respawn players
+        }
+
+        private static PlayerTeams? GetWinningTeam()
+        {
+            var remainingTeams = NetworkManager.Singleton.GetPlayers()
+                .Where(p => p.IsAlive)
+                .Select(p => p.Role.Team)
+                .Distinct()
+                .ToArray();
+
+            if (remainingTeams.Length > 1) return null;
+
+            if (!remainingTeams.Any())
+                throw new Exception("There are no teams left in the game");
+
+            return remainingTeams.First();
+        }
+
         private void AssignRolesToPlayers()
         {
             var randKillerIndex = Random.Range(0, NetworkManager.ConnectedClients.Keys.Count());
@@ -113,8 +118,9 @@ namespace Behaviors
             
             foreach (var connectedClient in NetworkManager.ConnectedClients)
             {
-                var iPlayer = connectedClient.Value.PlayerObject.GetComponent<Player>();
-                
+                if (!connectedClient.Value.PlayerObject.TryGetComponent<Player>(out var iPlayer))
+                    continue;
+
                 if (connectedClient.Key == killerClientId)
                 {
                     iPlayer.SetPlayerRole(PlayerRoles.Killer);
@@ -123,6 +129,14 @@ namespace Behaviors
                 
                 iPlayer.SetPlayerRole(PlayerRoles.Civilian);
             }
+        }
+
+        public void StartMatch()
+        {
+            if (!IsServer || NetworkManager.ConnectedClients.Count == 0) return;
+            
+            _matchStartedAt.Value = NetworkManager.ServerTime.TimeAsFloat;
+            AssignRolesToPlayers();
         }
     }
 }
