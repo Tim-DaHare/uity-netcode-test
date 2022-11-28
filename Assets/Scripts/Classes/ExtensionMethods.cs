@@ -8,7 +8,11 @@ namespace Classes
     {
         public static Player GetPlayer(this NetworkManager netManager, ulong clientId)
         {
-            return NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).GetComponent<Player>();
+            netManager.SpawnManager
+                .GetPlayerNetworkObject(clientId)
+                .TryGetComponent<Player>(out var player);
+
+            return player;
         }
         
         /// <summary>
@@ -22,8 +26,10 @@ namespace Classes
             if (!NetworkManager.Singleton.IsServer) return null;
             
             return NetworkManager.Singleton.ConnectedClients
-                .Select(c => 
-                    c.Value.PlayerObject.GetComponent<Player>())
+                .Select(c => {
+                    c.Value.PlayerObject.TryGetComponent<Player>(out var player);
+                    return player;
+                })
                 .ToArray();
         }
         
